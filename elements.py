@@ -21,7 +21,8 @@ class Dropdown:
                 text_padding=10,
                 textbox_padding=10,
                 tri_padding=15,
-                sensitivity=5):
+                sensitivity=5,
+                view=1):
 
         self.loc, self.size = loc, size
         self.selected = initial_text
@@ -44,6 +45,7 @@ class Dropdown:
         self.tri_rect = (self.loc[0] + self.size[0] - self.tri_padding - width, self.loc[1] + self.tri_padding, width, width)
         self.surf = pygame.Surface(pop_size, pygame.SRCALPHA)
         self.silder_y = 0
+        self.view = view
 
     def draw(self, window, events):
         pygame.draw.rect(window, self.bg_col, (*self.loc, *self.size), border_radius=self.rounding)
@@ -109,4 +111,4 @@ class Dropdown:
                     if event.button == 5:
                         self.silder_y -= self.sensitivity
                 self.silder_y = min(self.silder_y, 0)
-                self.silder_y = max(self.silder_y, -self.textbox_size[1]*(len(self.choices)-1))
+                self.silder_y = max(self.silder_y, -self.textbox_size[1]*(len(self.choices)-self.view))
