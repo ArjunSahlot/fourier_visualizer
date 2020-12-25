@@ -127,7 +127,8 @@ class Button:
                 bg_col=BLACK,
                 bg_col_hover=BLACK,
                 border=5,
-                border_col=WHITE):
+                border_col=WHITE,
+                rounding=0):
 
         self.x, self.y = x, y
         self.width, self.height = width, height
@@ -136,20 +137,21 @@ class Button:
         self.font = pygame.font.SysFont("comicsans", font_size)
         self.bg_col, self.bg_col_hover = bg_col, bg_col_hover
         self.border = border
+        self.rounding = rounding
         self.border_col = border_col
     
     def update(self, window, events):
         color = self.bg_col
         clicked = False
-        for event in events:
-            if self.rect.collidepoint(event.pos):
-                color = self.bg_col_hover
+        if self.rect.collidepoint(pygame.mouse.get_pos()):
+            color = self.bg_col_hover
+            for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     clicked = True
         
-        pygame.draw.rect(window, color, self.rect)
+        pygame.draw.rect(window, color, self.rect, border_radius=self.rounding)
         if self.border > 0:
-            pygame.draw.rect(window, self.border_col, self.rect, self.border)
+            pygame.draw.rect(window, self.border_col, self.rect, self.border, border_radius=self.rounding)
         text = self.font.render(self.text, 1, self.text_col)
         window.blit(text, (self.x + self.width/2 - text.get_width()/2, self.y + self.height/2 - text.get_height()/2))
 
