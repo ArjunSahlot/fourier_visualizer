@@ -66,7 +66,7 @@ class Dropdown:
 
         if self.popped:
             pygame.draw.polygon(window, self.border_col, ((middle, top), (left, bottom), (right, bottom)))
-            self.draw_surf()
+            self.draw_surf(window, events)
             window.blit(self.surf, self.pop_loc)
             pygame.draw.rect(window, self.border_col, (*self.pop_loc, *self.pop_size), self.pop_border, border_bottom_left_radius=self.rounding, border_bottom_right_radius=self.rounding)
         else:
@@ -75,15 +75,14 @@ class Dropdown:
     def get_selection(self):
         return self.selected
 
-    def draw_surf(self):
+    def draw_surf(self, window, events):
         self.surf.fill(self.bg_col)
         mx, my = pygame.mouse.get_pos()
         for i, text in enumerate(self.choices):
             y = i * self.textbox_size[1] + self.silder_y
             if pygame.Rect(self.pop_loc[0], y + self.pop_loc[1], *self.textbox_size).collidepoint(mx, my) or self.choices[i] == self.selected:
                 pygame.draw.rect(self.surf, self.hightlight_col, (self.textbox_padding/2, y + self.textbox_padding/2, self.textbox_size[0] - self.textbox_padding, self.textbox_size[1] - self.textbox_padding), border_radius=self.rounding)
-            text = self.font.render(text, 1, self.color)
-            self.surf.blit(text, (self.textbox_size[0]/2 - text.get_width()/2, y + self.textbox_size[1]/2 - text.get_height()/2))
+            text.update(window, events, 0, y, *self.textbox_size)
 
     def _update(self, window, events):
         mx, my = pygame.mouse.get_pos()
@@ -93,7 +92,7 @@ class Dropdown:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.popped = not self.popped
         else:
-            if self.popped:
+            if pygame.Rect(*self.pop_loc, *self.pop_size).collidepoint(mx, my) and self.popped:
                 for i in range(len(self.choices)):
                     y = i * self.textbox_size[1] + self.silder_y
                     if pygame.Rect(self.pop_loc[0], y + self.pop_loc[1], *self.textbox_size).collidepoint(mx, my):
@@ -128,7 +127,7 @@ class Button:
                 bg_col_hover=BLACK,
                 border=5,
                 border_col=WHITE,
-                rounding=0):
+                rounding=1):
 
         self.x, self.y = x, y
         self.width, self.height = width, height
@@ -156,3 +155,28 @@ class Button:
         window.blit(text, (self.x + self.width/2 - text.get_width()/2, self.y + self.height/2 - text.get_height()/2))
 
         return clicked
+
+class Check:
+    width = height = 50
+
+    def __init__(self, x, y, text):
+        self.x, self.y = x, y
+        self.checked = False
+        self.surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+        self.surf.fill((0, 0, 0, 0))
+        pygame.draw.polygon(self.surf, WHITE, [(9.7, 19.8), (3.4, 29.3), (21.5, 38.2), (45.3, 16.4), (38.6, 9.9), (22.5, 26.9)])
+        self.text = text
+
+    def update(self, window, events):
+        self.draw(window)
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(event.pos):
+                    self.checked = not self.checked
+
+    def draw(self, window):
+        text_surf = pygame.font.SysFont("comicsans", self.height - 8).render(self.text, 1, WHITE)
+        pygame.draw.rect(window, WHITE, (self.x, self.y, self.width, self.height), 5, 1)
+        if self.checked:
+            window.blit(self.surf, (self.x, self.y))
+        window.blit(text_surf, (self.x + self.width + 8, self.y + self.height/2 - text_surf.get_height()/2))

@@ -1,6 +1,6 @@
 import os
 
-WIDTH, HEIGHT = 1000, 1000
+WIDTH, HEIGHT = 1400, 1000
 
 FPS = 90
 
