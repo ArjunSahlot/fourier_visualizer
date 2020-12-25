@@ -1,4 +1,5 @@
 import pygame
+from constants import *
 
 pygame.init()
 
@@ -26,7 +27,7 @@ class Dropdown:
 
         self.loc, self.size = loc, size
         self.selected = initial_text
-        self.pop_loc = (loc[0] + size[0]//2 - pop_size[0]//2, loc[1] + size[1] - pop_border)
+        self.pop_loc = (loc[0] + size[0]/2 - pop_size[0]/2, loc[1] + size[1] - pop_border)
         self.pop_size = pop_size
         self.choices = choices
         self.font = font
@@ -54,11 +55,11 @@ class Dropdown:
 
         pygame.draw.rect(window, self.border_col, (*self.loc, *self.size), self.border, border_top_left_radius=self.rounding, border_top_right_radius=self.rounding)
         text = self.font.render(self.selected, 1, self.color)
-        window.blit(text, (self.loc[0] + self.size[0]//2 - text.get_width()//2, self.loc[1] + self.size[1]//2 - text.get_height()//2))
+        window.blit(text, (self.loc[0] + self.size[0]/2 - text.get_width()/2, self.loc[1] + self.size[1]/2 - text.get_height()/2))
 
 
         left = self.tri_rect[0]
-        middle = self.tri_rect[0] + self.tri_rect[2]//2
+        middle = self.tri_rect[0] + self.tri_rect[2]/2
         right = self.tri_rect[0] + self.tri_rect[2]
         top = self.tri_rect[1]
         bottom = self.tri_rect[1] + self.tri_rect[3]
@@ -80,9 +81,9 @@ class Dropdown:
         for i, text in enumerate(self.choices):
             y = i * self.textbox_size[1] + self.silder_y
             if pygame.Rect(self.pop_loc[0], y + self.pop_loc[1], *self.textbox_size).collidepoint(mx, my) or self.choices[i] == self.selected:
-                pygame.draw.rect(self.surf, self.hightlight_col, (self.textbox_padding//2, y + self.textbox_padding//2, self.textbox_size[0] - self.textbox_padding, self.textbox_size[1] - self.textbox_padding), border_radius=self.rounding)
+                pygame.draw.rect(self.surf, self.hightlight_col, (self.textbox_padding/2, y + self.textbox_padding/2, self.textbox_size[0] - self.textbox_padding, self.textbox_size[1] - self.textbox_padding), border_radius=self.rounding)
             text = self.font.render(text, 1, self.color)
-            self.surf.blit(text, (self.textbox_size[0]//2 - text.get_width()//2, y + self.textbox_size[1]//2 - text.get_height()//2))
+            self.surf.blit(text, (self.textbox_size[0]/2 - text.get_width()/2, y + self.textbox_size[1]/2 - text.get_height()/2))
 
     def _update(self, window, events):
         mx, my = pygame.mouse.get_pos()
@@ -112,3 +113,44 @@ class Dropdown:
                         self.silder_y -= self.sensitivity
                 self.silder_y = min(self.silder_y, 0)
                 self.silder_y = max(self.silder_y, -self.textbox_size[1]*(len(self.choices)-self.view))
+
+
+class Button:
+    def __init__(self,
+                x,
+                y,
+                width,
+                height,
+                text,
+                font_size=35,
+                text_col=WHITE,
+                bg_col=BLACK,
+                bg_col_hover=BLACK,
+                border=5,
+                border_col=WHITE):
+
+        self.x, self.y = x, y
+        self.width, self.height = width, height
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text, self.text_col = text, text_col
+        self.font = pygame.font.SysFont("comicsans", font_size)
+        self.bg_col, self.bg_col_hover = bg_col, bg_col_hover
+        self.border = border
+        self.border_col = border_col
+    
+    def update(self, window, events):
+        color = self.bg_col
+        clicked = False
+        for event in events:
+            if self.rect.collidepoint(event.pos):
+                color = self.bg_col_hover
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    clicked = True
+        
+        pygame.draw.rect(window, color, self.rect)
+        if self.border > 0:
+            pygame.draw.rect(window, self.border_col, self.rect, self.border)
+        text = self.font.render(self.text, 1, self.text_col)
+        window.blit(text, (self.x + self.width/2 - text.get_width()/2, self.y + self.height/2 - text.get_height()/2))
+
+        return clicked
