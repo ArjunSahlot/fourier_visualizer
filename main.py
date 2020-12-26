@@ -2,6 +2,7 @@ import pygame
 from constants import *
 from elements import *
 from sort import SortUI
+from interface import Interface
 
 
 # Window Management
@@ -17,6 +18,7 @@ def main(window):
     drop = Dropdown((100, 70), (200, 50), (200, 150), choices=choices, border_col=WHITE, bg_col=BLACK, color=WHITE, hightlight_col=(80, 80, 80), sensitivity=10, initial_text="Sort")
     loop = Check(137, 280, "Loop")
     mode = "VISUALIZE"
+    interface = Interface(400, 0, 1000, 1000, mode)
 
     while True:
         clock.tick(FPS)
@@ -29,6 +31,7 @@ def main(window):
             button.text = mode.capitalize()
         loop.y = 280 if drop.popped else 130
         loop.update(window, events)
+        interface.update(window, events)
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
