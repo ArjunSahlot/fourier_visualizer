@@ -31,7 +31,7 @@ def main(window):
             button.text = mode.capitalize()
         loop.y = 280 if drop.popped else 130
         loop.update(window, events)
-        interface.update(window, events)
+        interface.update(window, events, mode)
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()
