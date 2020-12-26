@@ -1,6 +1,7 @@
 import pygame
 from constants import *
 from cmath import exp, pi, phase as atan2, sqrt, cos, sin
+import numpy as np
 
 
 class Interface:
@@ -8,12 +9,36 @@ class Interface:
         self.x, self.y, self.width, self.height = x, y, width, height
         self.cycles = []
         self.time = 0
+        self.points = []
+        self.fourier_conns = []
     
-    def update(self, window, events, mode):
-        self.draw(window)
+    def update(self, window, events, mode, loop, reset, sort, update, playing):
+        mx, my = pygame.mouse.get_pos()
+        if self.cycles: self.time += 2 * pi / len(self.cycles) if playing else 0
+        if update:
+            self.time = 0
+            if isinstance(sort, str):
+                self.dft("radius", True)
+            else:
+                self.dft(sort.text, sort.dir)
+        self.draw(window, mode)
+        if mode == "CREATE":
+            if self.x < mx < self.x + self.width and self.y < my < self.y + self.height:
+                if pygame.mouse.get_pressed()[0]:
+                    self.points.append((mx - self.x - self.width/2, my - self.y - self.height/2))
+
     
-    def draw(self, window):
-        pass
+    def draw(self, window, mode):
+        if mode == "VISUALIZE":
+            self.fourier_conns.append(self.draw_fourier(window))
+            for i in range(len(self.fourier_conns) - 1):
+                pygame.draw.line(window, RED, self.fourier_conns[i] + np.array((self.x + self.width/2, self.y + self.height/2)), self.fourier_conns[i+1] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
+            if len(self.fourier_conns) > 1: pygame.draw.line(window, RED, self.fourier_conns[-1] + np.array((self.x + self.width/2, self.y + self.height/2)), self.fourier_conns[0] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
+        else:
+            if len(self.points) > 1:
+                for i in range(len(self.points) - 1):
+                    pygame.draw.line(window, WHITE, self.points[i] + np.array((self.x + self.width/2, self.y + self.height/2)), self.points[i+1] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
+                pygame.draw.line(window, WHITE, self.points[-1] + np.array((self.x + self.width/2, self.y + self.height/2)), self.points[0] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
 
     def draw_fourier(self, window):
         x, y = self.x + self.width/2, self.y + self.height/2
@@ -32,9 +57,9 @@ class Interface:
 
         return (x.real, y.real)
 
-    def dft(self, _points, sort, reverse):
+    def dft(self, sort, reverse):
         points = []
-        for x, y in _points:
+        for x, y in self.points:
             points.append(complex(x, y))
 
         self.cycles = []
@@ -59,6 +84,6 @@ class Interface:
         elif sort.lower() == "speed":
             self.cycles.sort(key=lambda x: x["freq"], reverse=reverse)
 
-        self.cycles[-1]["last"] = True
+        if self.cycles: self.cycles[-1]["last"] = True
 
         return self.cycles

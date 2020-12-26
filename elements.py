@@ -51,7 +51,8 @@ class Dropdown:
     def draw(self, window, events):
         pygame.draw.rect(window, self.bg_col, (*self.loc, *self.size), border_radius=self.rounding)
 
-        self._update(window, events)
+        if self._update(window, events):
+            return True
 
         pygame.draw.rect(window, self.border_col, (*self.loc, *self.size), self.border, border_top_left_radius=self.rounding, border_top_right_radius=self.rounding)
         if isinstance(self.selected, str):
@@ -86,7 +87,9 @@ class Dropdown:
                 pygame.draw.rect(self.surf, self.hightlight_col, (self.textbox_padding/2, y + self.textbox_padding/2, self.textbox_size[0] - self.textbox_padding, self.textbox_size[1] - self.textbox_padding), border_radius=self.rounding)
         window.blit(self.surf, self.pop_loc)
         for i, text in enumerate(self.choices):
-            text.update(window, self.pop_loc[0], i * self.textbox_size[1] + self.slider_y + self.pop_loc[1], *self.textbox_size)
+            y = i * self.textbox_size[1] + self.slider_y + self.pop_loc[1]
+            if y > self.pop_loc[0]:
+                text.update(window, self.pop_loc[0], y, *self.textbox_size)
 
     def _update(self, window, events):
         mx, my = pygame.mouse.get_pos()
@@ -99,6 +102,7 @@ class Dropdown:
                     if event.button == 3:
                         if hasattr(self.selected, "dir"):
                             self.selected.dir = not self.selected.dir
+                            return True
         else:
             if pygame.Rect(*self.pop_loc, *self.pop_size).collidepoint(mx, my) and self.popped:
                 for i in range(len(self.choices)):
@@ -108,15 +112,19 @@ class Dropdown:
                             if event.type == pygame.MOUSEBUTTONDOWN:
                                 if event.button == 1:
                                     self.selected = self.choices[i]
+                                    self.popped = False
+                                    return True
                                 if event.button == 3:
                                     self.choices[i].dir = not self.choices[i].dir
+                                    if self.selected == self.choices[i]:
+                                        return True
 
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     self.popped = False
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if pygame.Rect(*self.pop_loc, *self.pop_size).collidepoint(mx, my):
+                if pygame.Rect(*self.pop_loc, *self.pop_size).collidepoint(mx, my) and self.popped:
                     if event.button == 4:
                         self.slider_y += self.sensitivity
                     if event.button == 5:
