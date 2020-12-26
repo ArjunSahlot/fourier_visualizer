@@ -13,7 +13,7 @@ def main(window):
     pygame.init()
     clock = pygame.time.Clock()
     button = Button(100, 10, 200, 50, "Visualize", bg_col_hover=(80, 80, 80))
-    drop = Dropdown((100, 70), (200, 50), (200, 150), border_col=WHITE, bg_col=BLACK, color=WHITE, hightlight_col=(80, 80, 80), sensitivity=10, initial_text="Sort")
+    drop = Dropdown((100, 70), (200, 50), (200, 150), choices=(SortUI("hio", False),), border_col=WHITE, bg_col=BLACK, color=WHITE, hightlight_col=(80, 80, 80), sensitivity=10, initial_text="Sort")
     loop = Check(137, 280, "Loop")
     mode = "VISUALIZE"
 
