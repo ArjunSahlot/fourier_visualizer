@@ -4,13 +4,12 @@ from cmath import exp, pi, phase as atan2, sqrt, cos, sin
 
 
 class Interface:
-    def __init__(self, x, y, width, height, mode):
+    def __init__(self, x, y, width, height):
         self.x, self.y, self.width, self.height = x, y, width, height
-        self.mode = mode
         self.cycles = []
         self.time = 0
     
-    def update(self, window, events):
+    def update(self, window, events, mode):
         self.draw(window)
     
     def draw(self, window):

@@ -18,7 +18,7 @@ def main(window):
     drop = Dropdown((100, 70), (200, 50), (200, 150), choices=choices, border_col=WHITE, bg_col=BLACK, color=WHITE, hightlight_col=(80, 80, 80), sensitivity=10, initial_text="Sort")
     loop = Check(137, 280, "Loop")
     mode = "VISUALIZE"
-    interface = Interface(400, 0, 1000, 1000, mode)
+    interface = Interface(400, 0, 1000, 1000)
 
     while True:
         clock.tick(FPS)
