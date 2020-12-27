@@ -1,3 +1,4 @@
+import numpy as np
 import pygame
 from constants import *
 
@@ -192,6 +193,7 @@ class Check:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if pygame.Rect(self.x, self.y, self.width, self.height).collidepoint(event.pos):
                     self.checked = not self.checked
+                    return True
 
     def draw(self, window):
         text_surf = pygame.font.SysFont("comicsans", self.height - 8).render(self.text, 1, WHITE)
@@ -199,3 +201,46 @@ class Check:
         if self.checked:
             window.blit(self.surf, (self.x, self.y))
         window.blit(text_surf, (self.x + self.width + 8, self.y + self.height/2 - text_surf.get_height()/2))
+
+
+class Slider:
+    def __init__(self, loc, size, circle_size, font, label, default_val, val_range):
+        self.loc = loc
+        self.size = size
+        self.circle_size = circle_size
+        self.font = font
+        self.label = label
+        self.value = default_val
+        self.range = val_range
+        self.dragging = False
+
+    def update(self, window, events):
+        loc = self.loc
+        size = self.size
+
+        self.draw(window)
+        mx, my = pygame.mouse.get_pos()
+        for event in events:
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                if loc[0] <= mx <= loc[0]+size[0] and loc[1] <= my <= loc[1]+size[1]:
+                    self.dragging = True
+
+        clicked = pygame.mouse.get_pressed()[0]
+        if not clicked:
+            self.dragging = False
+
+        if clicked and self.dragging:
+            self.value = self.loc_to_value(mx)
+    
+    def draw(self, window):
+        text = self.font.render(f"{self.label}: {self.value}", 1, WHITE)
+        text_loc = (self.loc[0] + (self.size[0]-text.get_width())//2, self.loc[1]+self.size[1]+7)
+        pygame.draw.rect(window, GREY, tuple(self.loc)+tuple(self.size))
+        pygame.draw.circle(window, WHITE, (self.value_to_loc(), self.loc[1]+self.size[1]//2), self.circle_size)
+        window.blit(text, text_loc)
+
+    def loc_to_value(self, x):
+        return int(np.interp(x, (self.loc[0], self.loc[0] + self.size[0]), self.range))
+
+    def value_to_loc(self):
+        return int(np.interp(self.value, self.range, (self.loc[0], self.loc[0] + self.size[0])))

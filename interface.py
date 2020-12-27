@@ -2,6 +2,7 @@ import pygame
 from constants import *
 from cmath import exp, pi, phase as atan2, sqrt, cos, sin
 import numpy as np
+from elements import Button
 
 
 class Interface:
@@ -9,36 +10,75 @@ class Interface:
         self.x, self.y, self.width, self.height = x, y, width, height
         self.cycles = []
         self.time = 0
+        self.i = 0
+        self.speed = 90
+        self.line_thick = 4
         self.points = []
         self.fourier_conns = []
+        self.clear = Button(850, 0, 100, 50, "Clear", bg_col_hover=(80, 80, 80))
+        self.drawing = False
     
-    def update(self, window, events, mode, loop, reset, sort, update, playing):
+    def update(self, window, events, mode, loop, reset, sort, update, mode_update, playing):
         mx, my = pygame.mouse.get_pos()
-        if self.cycles: self.time += 2 * pi / len(self.cycles) if playing else 0
+        speed = int(np.interp(self.speed, (1, 100), (30, 1)))
+        self.i += 1
+        self.i %= speed
+        if self.cycles and self.i % speed == 0:
+            self.time += 2 * pi / len(self.cycles) if playing else 0
         if update:
-            self.time = 0
             if isinstance(sort, str):
-                self.dft("radius", True)
+                pass
             else:
                 self.dft(sort.text, sort.dir)
-        self.draw(window, mode)
+        if mode_update:
+            self.time = 0
+            self.fourier_conns.clear()
+            if loop:
+                self.points = self.points + list(reversed(self.points))
+            if mode == "VISUALIZE":
+                text = pygame.font.SysFont("comicsans", 80).render("Calculating...", 1, WHITE)
+                window.blit(text, (900 - text.get_width()/2, 500 - text.get_height()/2))
+                pygame.display.update()
+                if isinstance(sort, str):
+                    self.dft("radius", True)
+                else:
+                    self.dft(sort.text, sort.dir)
+            if mode == "CREATE":
+                self.points.clear()
+
+        if self.time > 2 * pi:
+            self.time = 0
+            if reset:
+                self.fourier_conns.clear()
+
+        self.draw(window, mode, loop)
+        in_draw_area = self.x < mx < self.x + self.width and self.y < my < self.y + self.height
         if mode == "CREATE":
-            if self.x < mx < self.x + self.width and self.y < my < self.y + self.height:
-                if pygame.mouse.get_pressed()[0]:
-                    self.points.append((mx - self.x - self.width/2, my - self.y - self.height/2))
+            for event in events:
+                if event.type == pygame.MOUSEBUTTONDOWN and in_draw_area:
+                    self.drawing = True if not pygame.Rect(self.clear.x, self.clear.y, self.clear.width, self.clear.height).collidepoint(event.pos) else False
+                if event.type == pygame.MOUSEBUTTONUP:
+                    self.drawing = False
+
+            clear = self.clear.update(window, events)
+            if in_draw_area and self.drawing:
+                self.points.append((mx - self.x - self.width/2, my - self.y - self.height/2))
+            if clear:
+                self.points.clear()
 
     
-    def draw(self, window, mode):
+    def draw(self, window, mode, loop):
         if mode == "VISUALIZE":
             self.fourier_conns.append(self.draw_fourier(window))
             for i in range(len(self.fourier_conns) - 1):
-                pygame.draw.line(window, RED, self.fourier_conns[i] + np.array((self.x + self.width/2, self.y + self.height/2)), self.fourier_conns[i+1] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
-            if len(self.fourier_conns) > 1: pygame.draw.line(window, RED, self.fourier_conns[-1] + np.array((self.x + self.width/2, self.y + self.height/2)), self.fourier_conns[0] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
+                pygame.draw.line(window, RED, self.fourier_conns[i], self.fourier_conns[i+1], self.line_thick)
         else:
             if len(self.points) > 1:
+                offset = np.array((self.x + self.width/2, self.y + self.height/2))
                 for i in range(len(self.points) - 1):
-                    pygame.draw.line(window, WHITE, self.points[i] + np.array((self.x + self.width/2, self.y + self.height/2)), self.points[i+1] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
-                pygame.draw.line(window, WHITE, self.points[-1] + np.array((self.x + self.width/2, self.y + self.height/2)), self.points[0] + np.array((self.x + self.width/2, self.y + self.height/2)), 3)
+                    pygame.draw.line(window, WHITE, self.points[i] + offset, self.points[i+1] + offset, self.line_thick)
+                if not loop:
+                    pygame.draw.line(window, WHITE, self.points[-1] + offset, self.points[0] + offset, self.line_thick)
 
     def draw_fourier(self, window):
         x, y = self.x + self.width/2, self.y + self.height/2
@@ -53,7 +93,7 @@ class Interface:
             y += radius * sin(freq * self.time + phase)
 
             pygame.draw.circle(window, RED if len(cycle) == 4 else WHITE, (prev_x.real, prev_y.real), radius, 1)
-            pygame.draw.line(window, RED if len(cycle) == 4 else WHITE, (prev_x.real, prev_y.real), (x.real, y.real), 3)
+            pygame.draw.line(window, RED if len(cycle) == 4 else WHITE, (prev_x.real, prev_y.real), (x.real, y.real), self.line_thick)
 
         return (x.real, y.real)
 
