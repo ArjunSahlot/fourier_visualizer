@@ -50,6 +50,13 @@ class Dropdown:
         self.view = view
 
     def draw(self, window, events):
+        left = self.tri_rect[0]
+        middle = self.tri_rect[0] + self.tri_rect[2]/2
+        right = self.tri_rect[0] + self.tri_rect[2]
+        top = self.tri_rect[1]
+        bottom = self.tri_rect[1] + self.tri_rect[3]
+
+        if self.popped: self.draw_surf(window)
         pygame.draw.rect(window, self.bg_col, (*self.loc, *self.size), border_radius=self.rounding)
 
         if self._update(window, events):
@@ -62,19 +69,12 @@ class Dropdown:
         else:
             self.selected.update(window, *self.loc, self.size[0] - 30, self.size[1])
 
-
-        left = self.tri_rect[0]
-        middle = self.tri_rect[0] + self.tri_rect[2]/2
-        right = self.tri_rect[0] + self.tri_rect[2]
-        top = self.tri_rect[1]
-        bottom = self.tri_rect[1] + self.tri_rect[3]
-
         if self.popped:
             pygame.draw.polygon(window, self.border_col, ((middle, top), (left, bottom), (right, bottom)))
-            self.draw_surf(window)
             pygame.draw.rect(window, self.border_col, (*self.pop_loc, *self.pop_size), self.pop_border, border_bottom_left_radius=self.rounding, border_bottom_right_radius=self.rounding)
         else:
             pygame.draw.polygon(window, self.border_col, ((middle, bottom), (left, top), (right, top)))
+
 
     def get_selection(self):
         return self.selected

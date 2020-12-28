@@ -25,6 +25,7 @@ def main(window):
                     hightlight_col=(80, 80, 80),
                     sensitivity=10,
                     initial_text="Sort")
+
     loop = Check(137, 147, "Loop")
     reset = Check(26.5, 210, "Clear every iteration")
     speed = Slider([80, 275], (240, 30), 18, pygame.font.SysFont("comicsans", 25), "Speed", 90, (1, 100))
