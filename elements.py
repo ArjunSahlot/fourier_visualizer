@@ -520,8 +520,8 @@ class PlayButton:
 
 class ColorPicker:
     def __init__(self, wheel_pos, wheel_rad, slider_pos, slider_size, slider_horiz, slider_invert, cursor_rad, display_rect_loc, display_rect_size, start):
-        self.wheel_pos, self.wheel_rad = wheel_pos, wheel_rad
-        self.slider_pos, self.slider_size, self.slider_horiz, self.slider_invert = slider_pos, slider_size, slider_horiz, slider_invert
+        self.wheel_pos, self.wheel_rad = list(wheel_pos), wheel_rad
+        self.slider_pos, self.slider_size, self.slider_horiz, self.slider_invert = list(slider_pos), slider_size, slider_horiz, slider_invert
         self.cursor_rad = cursor_rad
         self.display_rect_loc, self.display_rect_size = display_rect_loc, display_rect_size
         self.start = start
