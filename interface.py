@@ -3,6 +3,7 @@ from constants import *
 from cmath import exp, pi, phase as atan2, sqrt, cos, sin
 import numpy as np
 from elements import *
+import pickle
 
 
 class Interface:
@@ -42,7 +43,8 @@ class Interface:
         self.loop = Check(415, 15, "Loop")
         self.play = PlayButton(415, 905)
         self.drawing = False
-        self.data = {}
+        self.data = pickle.load(open(os.path.join(PARDIR, "creations.fourier"), "rb")) if os.path.isfile(os.path.join(PARDIR, "creations.fourier")) else {}
+        self.draws.choices = list(self.data.keys())
     
     def update(self, window, events, mode, reset, sort, update, mode_update, reverse):
         mx, my = pygame.mouse.get_pos()
@@ -92,7 +94,8 @@ class Interface:
                         self.name.clicked(events) or
                         self.draws.clicked(events) or
                         self.loop.clicked(events) or
-                        self.play.clicked(events)
+                        self.play.clicked(events) or
+                        self.save_draw.clicked(events)
                     ):
                         self.drawing = True
                         if self.draws.selected in self.data:
@@ -105,6 +108,7 @@ class Interface:
 
             clear = self.clear.update(window, events)
             if clear:
+                self.draws.selected = "Untitled"
                 self.points.clear()
 
             if self.save.update(window, events) or self.name.draw(window, events):
@@ -124,7 +128,8 @@ class Interface:
             self.loop.update(window, events)
             self.save_draw.y = 65 + self.draws.pop_size[1] if self.draws.popped else 65
             self.save_draw.rect[1] = 65 + self.draws.pop_size[1] if self.draws.popped else 65
-            self.save_draw.update(window, events)
+            if self.save_draw.update(window, events):
+                pickle.dump(self.data, open(os.path.join(PARDIR, "creations.fourier"), "wb"))
             
         else:
             self.play.update(window, events)

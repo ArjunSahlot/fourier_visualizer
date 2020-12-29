@@ -132,8 +132,7 @@ class Dropdown:
                                         if self.selected == self.choices[i]:
                                             return True
                                     else:
-                                        if i != 0:
-                                            return self.choices.pop(i)
+                                        return self.choices.pop(i)
 
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
