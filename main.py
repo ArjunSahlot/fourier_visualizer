@@ -30,8 +30,8 @@ def main(window):
     reset = Check(26.5, 147, "Clear every iteration")
     reverse = Check(114.5, 210, "Reverse")
     speed = Slider([80, 280], (240, 30), 18, pygame.font.SysFont("comicsans", 25), "Speed", 90, (1, 100))
-    draw = ColorPicker((70, 400), 100, (280, 400), (40, 200), False, False, 5, (0, 0), (0, 0))
-    fourier = ColorPicker((70, 650), 100, (280, 650), (40, 200), False, False, 5, (0, 0), (0, 0))
+    draw = ColorPicker((70, 400), 100, (280, 400), (40, 200), False, False, 5, (0, 0), (0, 0), None)
+    fourier = ColorPicker((70, 650), 100, (280, 650), (40, 200), False, False, 5, (0, 0), (0, 0), start="red")
     color_label_font = pygame.font.SysFont("comicsans", 25)
     mode = "CREATE"
     interface = Interface(400, 0, 1000, 1000)
