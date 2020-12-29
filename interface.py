@@ -102,14 +102,37 @@ class Interface:
                             self.draws.selected = "Untitled"
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.drawing = False
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_DELETE:
+                        self.clear_points()
+                    if event.key == pygame.K_BACKSPACE:
+                        if self.points:
+                            self.points.pop(-1)
+                    if event.key == pygame.K_UP:
+                        if self.draws.choices:
+                            if self.draws.selected == "Untitled":
+                                index = -1
+                            else:
+                                index = self.draws.choices.index(self.draws.selected) - 1
+                            self.draws.selected = self.draws.choices[index]
+                        else:
+                            self.draws.selected = "Untitled"
+                    if event.key == pygame.K_DOWN:
+                        if self.draws.choices:
+                            if self.draws.selected == "Untitled":
+                                index = 0
+                            else:
+                                index = (self.draws.choices.index(self.draws.selected) + 1) % len(self.draws.choices)
+                            self.draws.selected = self.draws.choices[index]
+                        else:
+                            self.draws.selected = "Untitled"
 
             if in_draw_area and self.drawing:
                 self.points.append((mx - self.x - self.width/2, my - self.y - self.height/2))
 
             clear = self.clear.update(window, events)
             if clear:
-                self.draws.selected = "Untitled"
-                self.points.clear()
+                self.clear_points()
 
             if self.save.update(window, events) or self.name.draw(window, events):
                 if self.name.text:
@@ -140,6 +163,10 @@ class Interface:
             if keys[pygame.K_RIGHT] or keys[pygame.K_UP]:
                 if self.cycles and self.i % speed == 0:
                     self.time += 2 * pi / len(self.cycles)
+    
+    def clear_points(self):
+        self.draws.selected = "Untitled"
+        self.points.clear()
 
     
     def draw(self, window, mode, loop):
