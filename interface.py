@@ -55,6 +55,9 @@ class Interface:
             num = -2 if reverse else 2
             self.time += num * pi / len(self.cycles) if self.play.status else 0
         if update:
+            text = pygame.font.SysFont("comicsans", 80).render("Calculating...", 1, WHITE)
+            window.blit(text, (900 - text.get_width()/2, 500 - text.get_height()/2))
+            pygame.display.update()
             if isinstance(sort, str):
                 pass
             else:
