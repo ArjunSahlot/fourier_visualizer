@@ -2,7 +2,7 @@ import pygame
 from constants import *
 from cmath import exp, pi, phase as atan2, sqrt, cos, sin
 import numpy as np
-from elements import Button
+from elements import *
 
 
 class Interface:
@@ -16,15 +16,42 @@ class Interface:
         self.points = []
         self.fourier_conns = []
         self.clear = Button(850, 0, 100, 50, "Clear", bg_col_hover=(80, 80, 80))
+        self.name = TextInput(
+            (950, 960),
+            (300, 40),
+            (0, 0, 1),
+            border_col=WHITE,
+            text_col=WHITE,
+            cursor_col=(255, 255, 254),
+            font=pygame.font.SysFont("comicsans", 30),
+            max_len=20
+        )
+        self.draws = Dropdown(
+            (1090, 0),
+            (300, 50),
+            (300, 150),
+            bg_col=(0, 0, 0),
+            border_col=WHITE,
+            color=WHITE,
+            hightlight_col=(80, 80, 80),
+            sensitivity=10,
+            type="draw"
+        )
+        self.save_draw = Button(1240, 65, 150, 40, "Save Creations", bg_col_hover=(80, 80, 80), font_size=25)
+        self.save = Button(1265, 960, 135, 40, "Save", bg_col_hover=(80, 80, 80))
+        self.loop = Check(415, 15, "Loop")
+        self.play = PlayButton(415, 905)
         self.drawing = False
+        self.data = {}
     
-    def update(self, window, events, mode, loop, reset, sort, update, mode_update, playing):
+    def update(self, window, events, mode, reset, sort, update, mode_update, reverse):
         mx, my = pygame.mouse.get_pos()
         speed = int(np.interp(self.speed, (1, 100), (30, 1)))
         self.i += 1
         self.i %= speed
         if self.cycles and self.i % speed == 0:
-            self.time += 2 * pi / len(self.cycles) if playing else 0
+            num = -2 if reverse else 2
+            self.time += num * pi / len(self.cycles) if self.play.status else 0
         if update:
             if isinstance(sort, str):
                 pass
@@ -33,7 +60,7 @@ class Interface:
         if mode_update:
             self.time = 0
             self.fourier_conns.clear()
-            if loop:
+            if self.loop.checked:
                 self.points = self.points + list(reversed(self.points))
             if mode == "VISUALIZE":
                 text = pygame.font.SysFont("comicsans", 80).render("Calculating...", 1, WHITE)
@@ -43,28 +70,71 @@ class Interface:
                     self.dft("radius", True)
                 else:
                     self.dft(sort.text, sort.dir)
-            if mode == "CREATE":
-                self.points.clear()
+            else:
+                if self.draws.selected == "Untitled":
+                    self.points.clear()
+                else:
+                    self.points = self.data[self.draws.selected]
 
-        if self.time > 2 * pi:
+        if self.time > 2 * pi or self.time < -2 * pi:
             self.time = 0
             if reset:
                 self.fourier_conns.clear()
 
-        self.draw(window, mode, loop)
+        self.draw(window, mode, self.loop.checked)
         in_draw_area = self.x < mx < self.x + self.width and self.y < my < self.y + self.height
         if mode == "CREATE":
             for event in events:
                 if event.type == pygame.MOUSEBUTTONDOWN and in_draw_area:
-                    self.drawing = True if not pygame.Rect(self.clear.x, self.clear.y, self.clear.width, self.clear.height).collidepoint(event.pos) else False
+                    if not (
+                        self.clear.clicked(events) or
+                        self.save.clicked(events) or
+                        self.name.clicked(events) or
+                        self.draws.clicked(events) or
+                        self.loop.clicked(events) or
+                        self.play.clicked(events)
+                    ):
+                        self.drawing = True
+                        if self.draws.selected in self.data:
+                            self.draws.selected = "Untitled"
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.drawing = False
 
-            clear = self.clear.update(window, events)
             if in_draw_area and self.drawing:
                 self.points.append((mx - self.x - self.width/2, my - self.y - self.height/2))
+
+            clear = self.clear.update(window, events)
             if clear:
                 self.points.clear()
+
+            if self.save.update(window, events) or self.name.draw(window, events):
+                if self.name.text:
+                    if self.name.text not in self.draws.choices:
+                        self.draws.choices.append(self.name.text)
+                    self.draws.selected = self.name.text
+                    self.data[self.name.text] = self.points[:]
+                    self.name.clear_text()
+
+            draw_update = self.draws.draw(window, events)
+            if draw_update:
+                if self.draws.selected in self.data:
+                    self.points = self.data[self.draws.selected]
+                if isinstance(draw_update, str):
+                    del self.data[draw_update]
+            self.loop.update(window, events)
+            self.save_draw.y = 65 + self.draws.pop_size[1] if self.draws.popped else 65
+            self.save_draw.rect[1] = 65 + self.draws.pop_size[1] if self.draws.popped else 65
+            self.save_draw.update(window, events)
+            
+        else:
+            self.play.update(window, events)
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT] or keys[pygame.K_DOWN]:
+                if self.cycles and self.i % speed == 0:
+                    self.time -= 2 * pi / len(self.cycles)
+            if keys[pygame.K_RIGHT] or keys[pygame.K_UP]:
+                if self.cycles and self.i % speed == 0:
+                    self.time += 2 * pi / len(self.cycles)
 
     
     def draw(self, window, mode, loop):
@@ -72,6 +142,8 @@ class Interface:
             self.fourier_conns.append(self.draw_fourier(window))
             for i in range(len(self.fourier_conns) - 1):
                 pygame.draw.line(window, RED, self.fourier_conns[i], self.fourier_conns[i+1], self.line_thick)
+            text_surf = pygame.font.SysFont("comicsans", 40).render(self.draws.selected, 1, WHITE)
+            window.blit(text_surf, (WIDTH - 10 - text_surf.get_width(), 10))
         else:
             if len(self.points) > 1:
                 offset = np.array((self.x + self.width/2, self.y + self.height/2))
