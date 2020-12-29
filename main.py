@@ -30,6 +30,9 @@ def main(window):
     reset = Check(26.5, 147, "Clear every iteration")
     reverse = Check(114.5, 210, "Reverse")
     speed = Slider([80, 280], (240, 30), 18, pygame.font.SysFont("comicsans", 25), "Speed", 90, (1, 100))
+    draw = ColorPicker((70, 400), 100, (280, 400), (40, 200), False, False, 5, (0, 0), (0, 0))
+    fourier = ColorPicker((70, 650), 100, (280, 650), (40, 200), False, False, 5, (0, 0), (0, 0))
+    color_label_font = pygame.font.SysFont("comicsans", 25)
     mode = "CREATE"
     interface = Interface(400, 0, 1000, 1000)
 
@@ -50,8 +53,14 @@ def main(window):
         reverse.update(window, events)
         speed.loc[1] = 280 + sort_drop.pop_size[1] if sort_drop.popped else 280
         speed.update(window, events)
+        draw.update(window)
+        text = color_label_font.render("Draw color", 1, draw.get_rgb() if sum(draw.get_rgb()) > 80 else (255, 255, 255))
+        window.blit(text, (200 - text.get_width()/2, 370))
+        fourier.update(window)
+        text = color_label_font.render("Fourier color", 1, fourier.get_rgb() if sum(fourier.get_rgb()) > 80 else (255, 255, 255))
+        window.blit(text, (200 - text.get_width()/2, 620))
         interface.speed = speed.value
-        interface.update(window, events, mode, reset.checked, sort_drop.selected, update, mode_update, reverse.checked)
+        interface.update(window, events, mode, reset.checked, sort_drop.selected, update, mode_update, reverse.checked, draw.get_rgb(), fourier.get_rgb())
         for event in events:
             if event.type == pygame.QUIT:
                 pygame.quit()

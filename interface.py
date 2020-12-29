@@ -46,7 +46,7 @@ class Interface:
         self.data = pickle.load(open(os.path.join(PARDIR, "creations.fourier"), "rb")) if os.path.isfile(os.path.join(PARDIR, "creations.fourier")) else {}
         self.draws.choices = list(self.data.keys())
     
-    def update(self, window, events, mode, reset, sort, update, mode_update, reverse):
+    def update(self, window, events, mode, reset, sort, update, mode_update, reverse, draw_col, fourier_col):
         mx, my = pygame.mouse.get_pos()
         speed = int(np.interp(self.speed, (1, 100), (30, 1)))
         self.i += 1
@@ -83,7 +83,7 @@ class Interface:
             if reset:
                 self.fourier_conns.clear()
 
-        self.draw(window, mode, self.loop.checked)
+        self.draw(window, mode, self.loop.checked, draw_col, fourier_col)
         in_draw_area = self.x < mx < self.x + self.width and self.y < my < self.y + self.height
         if mode == "CREATE":
             for event in events:
@@ -169,20 +169,20 @@ class Interface:
         self.points.clear()
 
     
-    def draw(self, window, mode, loop):
+    def draw(self, window, mode, loop, draw_col, fourier_col):
         if mode == "VISUALIZE":
             self.fourier_conns.append(self.draw_fourier(window))
             for i in range(len(self.fourier_conns) - 1):
-                pygame.draw.line(window, RED, self.fourier_conns[i], self.fourier_conns[i+1], self.line_thick)
+                pygame.draw.line(window, fourier_col, self.fourier_conns[i], self.fourier_conns[i+1], self.line_thick)
             text_surf = pygame.font.SysFont("comicsans", 40).render(self.draws.selected, 1, WHITE)
             window.blit(text_surf, (WIDTH - 10 - text_surf.get_width(), 10))
         else:
             if len(self.points) > 1:
                 offset = np.array((self.x + self.width/2, self.y + self.height/2))
                 for i in range(len(self.points) - 1):
-                    pygame.draw.line(window, WHITE, self.points[i] + offset, self.points[i+1] + offset, self.line_thick)
+                    pygame.draw.line(window, draw_col, self.points[i] + offset, self.points[i+1] + offset, self.line_thick)
                 if not loop:
-                    pygame.draw.line(window, WHITE, self.points[-1] + offset, self.points[0] + offset, self.line_thick)
+                    pygame.draw.line(window, draw_col, self.points[-1] + offset, self.points[0] + offset, self.line_thick)
 
     def draw_fourier(self, window):
         x, y = self.x + self.width/2, self.y + self.height/2

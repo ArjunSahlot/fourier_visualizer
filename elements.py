@@ -527,8 +527,6 @@ class ColorPicker:
         self.wheel_cursor, self.slider_cursor = np.array((wheel_rad,)*2), np.array((slider_size[0]//2, 1))
         self.slider_surf = pygame.Surface(slider_size)
         self.wheel_surf = pygame.transform.scale(pygame.image.load(os.path.join(os.path.realpath(os.path.dirname(__file__)), "assets", "color_picker.png")), (wheel_rad * 2,) * 2)
-        self.wheel_surf = pygame.Surface((wheel_rad*2,)*2, pygame.SRCALPHA)
-        self.wheel_surf.fill((0, 0, 0, 0))
         self.cursor_surf = pygame.Surface((self.cursor_rad*2,)*2, pygame.SRCALPHA)
         self.wheel_darken = pygame.Surface((wheel_rad * 2,) * 2, pygame.SRCALPHA)
         self._create_wheel()
@@ -551,7 +549,7 @@ class ColorPicker:
                 self.wheel_cursor = (x - self.wheel_pos[0], y - self.wheel_pos[1]) if pygame.mouse.get_pressed()[0] else (self.wheel_rad,)*2
                 return True
             elif self.slider_pos[0] < x < self.slider_pos[0] + self.slider_size[0] and self.slider_pos[1] < y < self.slider_pos[1] + self.slider_size[1]:
-                self.slider_cursor[1] = y - self.slider_pos[1] if pygame.mouse.get_pressed()[0] else 1
+                self.slider_cursor[1] = (y - self.slider_pos[1])*((self.slider_size[1]-1)/self.slider_size[1]) if pygame.mouse.get_pressed()[0] else 1
                 self.update_wheel()
                 return True
 
@@ -569,23 +567,10 @@ class ColorPicker:
         return np.array(rgb_to_hsv(*rgb))*255
 
     def update_wheel(self):
-        self.wheel_surf.fill((0, 0, 0, 0))
-        w, h = self.wheel_surf.get_size()
-
-        for x in w:
-            for y in h:
-                if (hyp := (x**2 + y**2)**0.5) <= self.wheel_rad:
-                    angle = np.arcsin(y/hyp) - np.pi/2
-                    hue = angle / (np.pi * 2)
-                    sat = hyp / (self.wheel_rad)
-                    self.wheel_surf.set_at((x, y), np.array(hsv_to_rgb(hue, sat, 1))*255)
-
-        pygame.draw.circle(self.wheel_darken, (0, 0, 0, np.interp(
-            self.get_hsv()[2], (0, 255), (255, 0))), (self.wheel_rad,)*2, self.wheel_rad)
+        pygame.draw.circle(self.wheel_darken, (0, 0, 0, np.interp(self.get_hsv()[2], (0, 255), (255, 0))), (self.wheel_rad,)*2, self.wheel_rad)
 
     def _create_wheel(self):
-        pygame.draw.circle(self.wheel_surf, (0, 0, 0),
-                           (self.wheel_rad+1,)*2, self.wheel_rad, 2)
+        return
 
     def _create_slider(self):
         w, h = self.slider_size
@@ -604,7 +589,7 @@ class ColorPicker:
                 else:
                     value = np.interp(y, (0, h), (255, 0))
                 pygame.draw.rect(self.slider_surf, (value,)*3, (0, y, w, 1))
-        pygame.draw.rect(self.slider_surf, (0, 0, 0), (0, 0, w, h), 1)
+        pygame.draw.rect(self.slider_surf, (255, 255, 255), (0, 0, w, h), 1)
 
     def _draw_cursor(self, window, pos):
         pygame.draw.circle(window, (255, 255, 255), pos, self.cursor_rad)
