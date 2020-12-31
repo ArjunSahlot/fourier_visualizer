@@ -34,6 +34,7 @@ def main(window):
     fourier = ColorPicker((70, 650), 100, (280, 650), (40, 200), False, False, 5, (0, 0), (0, 0), start="red")
     color_label_font = pygame.font.SysFont("comicsans", 25)
     mode = "CREATE"
+    tab_start = None
     interface = Interface(400, 0, 1000, 1000)
 
     while True:
@@ -41,8 +42,17 @@ def main(window):
         window.fill(BLACK)
         pygame.draw.line(window, WHITE, (400, 0), (400, 1000), 5)
         events = pygame.event.get()
+        keys = pygame.key.get_pressed()
         update = sort_drop.draw(window, events)
         mode_update = False
+        if keys[pygame.K_TAB]:
+            if tab_start != mode:
+                mode = "CREATE" if mode == "VISUALIZE" else "VISUALIZE"
+                button.text = "CREATE" if mode == "VISUALIZE" else "VISUALIZE"
+                mode_update = True
+                tab_start = mode
+        else:
+            tab_start = None
         if button.update(window, events):
             mode = "CREATE" if mode == "VISUALIZE" else "VISUALIZE"
             button.text = "CREATE" if mode == "VISUALIZE" else "VISUALIZE"
