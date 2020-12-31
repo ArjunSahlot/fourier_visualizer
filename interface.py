@@ -119,6 +119,7 @@ class Interface:
                             else:
                                 index = self.draws.choices.index(self.draws.selected) - 1
                             self.draws.selected = self.draws.choices[index]
+                            self.points = self.data[self.draws.selected][:]
                         else:
                             self.draws.selected = "Untitled"
                     if event.key == pygame.K_DOWN:
@@ -128,6 +129,7 @@ class Interface:
                             else:
                                 index = (self.draws.choices.index(self.draws.selected) + 1) % len(self.draws.choices)
                             self.draws.selected = self.draws.choices[index]
+                            self.points = self.data[self.draws.selected][:]
                         else:
                             self.draws.selected = "Untitled"
 
