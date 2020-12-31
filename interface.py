@@ -103,6 +103,7 @@ class Interface:
                         self.drawing = True
                         if self.draws.selected in self.data:
                             self.draws.selected = "Untitled"
+                            self.points = self.points[:]
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.drawing = False
                 if event.type == pygame.KEYDOWN:
