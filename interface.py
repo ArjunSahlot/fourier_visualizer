@@ -122,6 +122,7 @@ class Interface:
                             self.points = self.data[self.draws.selected][:]
                         else:
                             self.draws.selected = "Untitled"
+
                     if event.key == pygame.K_DOWN:
                         if self.draws.choices:
                             if self.draws.selected == "Untitled":
@@ -132,6 +133,60 @@ class Interface:
                             self.points = self.data[self.draws.selected][:]
                         else:
                             self.draws.selected = "Untitled"
+                    
+                    if event.key in (pygame.K_1, pygame.K_0):
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[0]
+                        else:
+                            pass
+                    if event.key == pygame.K_2:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(1, len(self.draws.choices))]
+                        else:
+                            pass
+                    
+                    if event.key == pygame.K_3:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(2, len(self.draws.choices))]
+                        else:
+                            pass
+                    
+                    if event.key == pygame.K_4:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(3, len(self.draws.choices))]
+                        else:
+                            pass
+                    
+                    if event.key == pygame.K_5:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(4, len(self.draws.choices))]
+                        else:
+                            pass
+                    
+                    if event.key == pygame.K_6:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(5, len(self.draws.choices))]
+                        else:
+                            pass
+                    
+                    if event.key == pygame.K_7:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(6, len(self.draws.choices))]
+                        else:
+                            pass
+                    
+                    if event.key == pygame.K_8:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(7, len(self.draws.choices))]
+                        else:
+                            pass
+                    
+                    if event.key == pygame.K_9:
+                        if self.draws.choices:
+                            self.draws.selected = self.draws.choices[min(8, len(self.draws.choices))]
+                        else:
+                            pass
+
 
             if in_draw_area and self.drawing:
                 self.points.append((mx - self.x - self.width/2, my - self.y - self.height/2))
