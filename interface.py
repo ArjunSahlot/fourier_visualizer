@@ -112,6 +112,7 @@ class Interface:
                     if event.key == pygame.K_BACKSPACE:
                         if self.points:
                             self.points.pop(-1)
+                            self.draws.selected = "Untitled"
                     if event.key == pygame.K_UP:
                         if self.draws.choices:
                             if self.draws.selected == "Untitled":
@@ -229,7 +230,7 @@ class Interface:
         self.draws.selected = "Untitled"
         self.points.clear()
 
-    
+
     def draw(self, window, mode, loop, draw_col, fourier_col):
         if mode == "VISUALIZE":
             self.fourier_conns.append(self.draw_fourier(window))
