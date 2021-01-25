@@ -254,21 +254,18 @@ class Slider:
         self.dragging = False
 
     def update(self, window, events):
-        loc = self.loc
-        size = self.size
-
         self.draw(window)
         mx, my = pygame.mouse.get_pos()
         for event in events:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if loc[0] <= mx <= loc[0]+size[0] and loc[1] <= my <= loc[1]+size[1]:
+                if self.loc[0] <= mx <= self.loc[0]+self.size[0] and self.loc[1] <= my <= self.loc[1]+self.size[1]:
                     self.dragging = True
 
-        clicked = pygame.mouse.get_pressed()[0]
-        if not clicked:
+        clicking = pygame.mouse.get_pressed()[0]
+        if not clicking:
             self.dragging = False
 
-        if clicked and self.dragging:
+        if clicking and self.dragging:
             self.value = self.loc_to_value(mx)
     
     def draw(self, window):
